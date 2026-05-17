@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30-Day A.I.M. Reset · Behavioral Companion</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+  :root {
+    --ink:#1A1A2E; --ink-70:rgba(26,26,46,.70); --ink-40:rgba(26,26,46,.40);
+    --white:#FFFFFF; --off:#F9FAFB; --slate:rgba(226,232,240,.55);
+    --w1:#3157C9; --w1-l:#EFF6FF;
+    --w2:#059669; --w2-l:#ECFDF5;
+    --w3:#0891B2; --w3-l:#ECFEFF;
+    --w4:#7C3AED; --w4-l:#F5F3FF;
+    --check:#10B981;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#E8EEF8;
+    display:flex;align-items:flex-start;justify-content:center;padding:40px 20px}
+  .page{background:var(--white);width:100%;max-width:900px;border-radius:20px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.02),0 8px 24px rgba(124,58,237,.08),0 32px 80px rgba(26,26,46,.06)}
+
+  .header{background:var(--ink);padding:30px 52px 28px;position:relative;overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+  .header::before{content:'';position:absolute;top:-60px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(124,58,237,.14)}
+  .header-left{position:relative;z-index:1}
+  .eyebrow{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#A78BFA;margin-bottom:10px}
+  .headline{font-family:'Sora',sans-serif;font-size:clamp(20px,3vw,28px);font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.3px}
+  .headline span{color:#A78BFA}
+  .header-right{position:relative;z-index:1;font-size:12.5px;color:rgba(255,255,255,.4);max-width:200px;text-align:right;line-height:1.65;flex-shrink:0}
+
+  .instruction{background:var(--w4-l);border-bottom:1px solid rgba(124,58,237,.12);padding:18px 52px;display:flex;gap:14px;align-items:flex-start}
+  .instruction-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+  .instruction-text{font-size:13px;color:#5B21B6;line-height:1.75}
+  .instruction-text strong{font-weight:700}
+
+  .body{padding:32px 52px 52px;display:flex;flex-direction:column;gap:28px}
+
+  /* RETURN STATE MESSAGE */
+  .return-msg{display:none;background:rgba(49,87,201,.06);border-left:3px solid var(--w1);
+    border-radius:0 8px 8px 0;padding:12px 18px;font-size:13px;color:var(--ink-70);line-height:1.65;
+    animation:fadeIn .5s ease}
+  .return-msg.show{display:block}
+
+  /* PROGRESS */
+  .progress-section{background:var(--ink);border-radius:14px;padding:22px 26px;display:flex;flex-direction:column;gap:12px}
+  .progress-header{display:flex;justify-content:space-between;align-items:center}
+  .progress-label{font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+  .progress-count{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:#fff}
+  .progress-track{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+  .progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#7C3AED,#A78BFA);transition:width .45s ease;width:0%}
+  .progress-note{font-size:12px;color:rgba(255,255,255,.32);font-style:italic}
+
+  /* MILESTONE */
+  .milestone{display:none;background:linear-gradient(135deg,#1E3A8A,#2563EB);border-radius:10px;padding:18px 22px;animation:fadeIn .5s ease}
+  .milestone.show{display:block}
+  .milestone-text{font-size:13.5px;color:rgba(255,255,255,.85);line-height:1.7;font-style:italic}
+  .milestone-text strong{color:#93C5FD;font-style:normal}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){
+    .milestone,.return-msg,.completion-screen{animation:none}
+    .progress-fill,.day-checkbox{transition:none}
+  }
+
+  /* WEEK SECTION */
+  .week-section{display:flex;flex-direction:column;gap:10px}
+  .week-header{border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+  .week-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;line-height:1;letter-spacing:-1px;flex-shrink:0;width:36px}
+  .week-info{flex:1}
+  .week-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
+  .week-sub{font-size:12px;margin-top:2px;line-height:1.4;opacity:.65}
+  .week-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;flex-shrink:0}
+  .w1 .week-header{background:var(--w1-l)} .w1 .week-num,.w1 .week-title{color:var(--w1)} .w1 .week-sub{color:var(--w1)} .w1 .week-badge{background:rgba(49,87,201,.12);color:var(--w1)}
+  .w2 .week-header{background:var(--w2-l)} .w2 .week-num,.w2 .week-title{color:var(--w2)} .w2 .week-sub{color:var(--w2)} .w2 .week-badge{background:rgba(5,150,105,.12);color:var(--w2)}
+  .w3 .week-header{background:var(--w3-l)} .w3 .week-num,.w3 .week-title{color:var(--w3)} .w3 .week-sub{color:var(--w3)} .w3 .week-badge{background:rgba(8,145,178,.12);color:var(--w3)}
+  .w4 .week-header{background:var(--w4-l)} .w4 .week-num,.w4 .week-title{color:var(--w4)} .w4 .week-sub{color:var(--w4)} .w4 .week-badge{background:rgba(124,58,237,.12);color:var(--w4)}
+
+  /* DAY ROWS */
+  .days-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  @media(max-width:640px){.days-grid{grid-template-columns:1fr}}
+  .day-row{display:flex;align-items:flex-start;gap:10px;padding:14px 14px;border-radius:8px;
+    border:1px solid var(--slate);background:var(--white);cursor:pointer;
+    transition:background .18s;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+  .day-row:hover{background:var(--off)}
+  /* next incomplete day — guided continuity */
+  .day-row.next-up{border-left-width:3px;border-left-color:rgba(124,58,237,.35) !important}
+  .day-checkbox{width:20px;height:20px;border-radius:5px;border:2px solid rgba(226,232,240,.8);
+    flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+    transition:all .2s;cursor:pointer}
+  .day-row.checked .day-checkbox{border-color:var(--check);background:var(--check)}
+  .day-row.checked{background:var(--off)}
+  .checkmark{display:none;color:white;font-size:12px;font-weight:700;line-height:1}
+  .day-row.checked .checkmark{display:block}
+  .day-info{flex:1;min-width:0}
+  .day-num-action{display:flex;align-items:baseline;gap:8px}
+  .day-num{font-family:'DM Mono',monospace;font-size:10.5px;font-weight:500;color:var(--ink-40);flex-shrink:0}
+  .day-action{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2}
+  .day-what{font-size:11.5px;color:var(--ink-40);line-height:1.55;margin-top:4px}
+  .day-row.checked .day-action{color:var(--ink-40);text-decoration:line-through}
+  .w1 .day-row{border-left:2px solid rgba(49,87,201,.15)}
+  .w2 .day-row{border-left:2px solid rgba(5,150,105,.15)}
+  .w3 .day-row{border-left:2px solid rgba(8,145,178,.15)}
+  .w4 .day-row{border-left:2px solid rgba(124,58,237,.15)}
+  .day-row.checked{border-left-color:var(--check) !important}
+
+  /* COMPLETION SCREEN — ceremonial */
+  .completion-screen{display:none;background:var(--ink);border-radius:14px;
+    padding:52px 40px;text-align:center;animation:fadeIn .6s ease;margin-top:8px}
+  .completion-screen.show{display:block}
+  .completion-line1{font-family:'Sora',sans-serif;font-size:clamp(16px,2.5vw,22px);font-weight:700;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:12px}
+  .completion-line2{font-family:'Sora',sans-serif;font-size:clamp(16px,2.5vw,22px);font-weight:700;color:#A78BFA;line-height:1.5}
+
+  .footer{background:var(--off);border-top:1px solid var(--slate);padding:16px 52px;display:flex;justify-content:space-between;align-items:center}
+  .footer-left{font-size:12px;font-weight:500;color:var(--ink-40)}
+  .footer-right{font-size:11px;font-weight:600;color:var(--ink-40);letter-spacing:.5px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="eyebrow">Chapter 11 · Transform Phase · A.I.M. Framework</div>
+      <div class="headline">30-Day A.I.M. Reset<br><span>Behavioral Companion</span></div>
+    </div>
+    <div class="header-right">Resume whenever you need to. The system was waiting.</div>
+  </div>
+  <div class="instruction">
+    <div class="instruction-icon">📌</div>
+    <div class="instruction-text"><strong>How to use:</strong> Work through one day at a time. If life interrupts, pick up where you left off. <strong>There is no failure state. There is only resumption.</strong></div>
+  </div>
+
+  <div class="body">
+
+    <!-- RETURN STATE — shows if user has prior progress -->
+    <div class="return-msg" id="return-msg">Welcome back. Resume where you left off — your progress has been saved.</div>
+
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-label">Progress</div>
+        <div class="progress-count"><span id="done-count">0</span> / 30 days complete</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-note" id="progress-note">Start Day 1 — tick each day as you complete it.</div>
+    </div>
+
+    <div class="milestone" id="milestone-msg"><div class="milestone-text" id="milestone-text"></div></div>
+
+    <!-- WEEK 1 -->
+    <div class="week-section w1">
+      <div class="week-header"><div class="week-num">W1</div><div class="week-info"><div class="week-title">Audit — Rebuild the Picture</div><div class="week-sub">Income, expenses, spending patterns, net position.</div></div><div class="week-badge">Days 1–7</div></div>
+      <div class="days-grid">
+        <div class="day-row" data-day="1" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 1</span><span class="day-action">Open the system</span></div><div class="day-what">Create your AI chat. Name it. Tell AI you are beginning the 30-Day Reset.</div></div></div>
+        <div class="day-row" data-day="2" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 2</span><span class="day-action">Income audit</span></div><div class="day-what">Tell AI your complete monthly income — all sources. Identify your net take-home.</div></div></div>
+        <div class="day-row" data-day="3" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 3</span><span class="day-action">Fixed costs audit</span></div><div class="day-what">List every fixed monthly cost — housing, utilities, insurance, subscriptions.</div></div></div>
+        <div class="day-row" data-day="4" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 4</span><span class="day-action">Variable spending audit</span></div><div class="day-what">Review last 30 days of statements. List variable spending by category.</div></div></div>
+        <div class="day-row" data-day="5" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 5</span><span class="day-action">The audit summary</span></div><div class="day-what">Ask AI to produce a one-page summary: income, fixed, variable, net position.</div></div></div>
+        <div class="day-row" data-day="6" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 6</span><span class="day-action">The value audit</span></div><div class="day-what">Identify three spending areas that add genuine value and three that do not.</div></div></div>
+        <div class="day-row" data-day="7" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 7</span><span class="day-action">Audit reflection</span></div><div class="day-what">Ask AI: what is the most important thing I should address based on this audit?</div></div></div>
+      </div>
+    </div>
+
+    <!-- WEEK 2 -->
+    <div class="week-section w2">
+      <div class="week-header"><div class="week-num">W2</div><div class="week-info"><div class="week-title">Implement — Savings and Spending</div><div class="week-sub">First two automated systems. Savings transfer running. Budget built.</div></div><div class="week-badge">Days 8–14</div></div>
+      <div class="days-grid">
+        <div class="day-row" data-day="8" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 8</span><span class="day-action">Set your savings number</span></div><div class="day-what">Run the savings starting point prompt (Ch.5). AI calculates your recommended transfer.</div></div></div>
+        <div class="day-row" data-day="9" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 9</span><span class="day-action">Set up savings transfer</span></div><div class="day-what">Open your banking app. Set up the automatic transfer on payday. Confirm it is active.</div></div></div>
+        <div class="day-row" data-day="10" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 10</span><span class="day-action">Emergency fund target</span></div><div class="day-what">Ask AI to calculate your emergency fund target. Set it as your savings goal.</div></div></div>
+        <div class="day-row" data-day="11" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 11</span><span class="day-action">Subscription audit</span></div><div class="day-what">Review 60 days of statements for recurring charges. Cancel what you do not use.</div></div></div>
+        <div class="day-row" data-day="12" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 12</span><span class="day-action">Build your budget</span></div><div class="day-what">Run the budget prompt (Ch.4). AI creates your five-category budget from your audit.</div></div></div>
+        <div class="day-row" data-day="13" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 13</span><span class="day-action">Budget stress-test</span></div><div class="day-what">Run the stress-test prompt. Ask AI what happens if income drops 20%.</div></div></div>
+        <div class="day-row" data-day="14" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 14</span><span class="day-action">Week 2 review</span></div><div class="day-what">Run the monthly review prompt. Ask AI to summarise your progress so far.</div></div></div>
+      </div>
+    </div>
+
+    <!-- WEEK 3 -->
+    <div class="week-section w3">
+      <div class="week-header"><div class="week-num">W3</div><div class="week-info"><div class="week-title">Implement — Debt and Investing</div><div class="week-sub">Debt plan automated. Investment contribution running.</div></div><div class="week-badge">Days 15–21</div></div>
+      <div class="days-grid">
+        <div class="day-row" data-day="15" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 15</span><span class="day-action">Complete debt picture</span></div><div class="day-what">Gather every debt: balance, interest rate, minimum payment. Run Ch.7 Prompt 1.</div></div></div>
+        <div class="day-row" data-day="16" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 16</span><span class="day-action">Choose debt strategy</span></div><div class="day-what">Run the debt strategy prompt (Ch.7). AI recommends avalanche or snowball.</div></div></div>
+        <div class="day-row" data-day="17" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 17</span><span class="day-action">Automate debt repayment</span></div><div class="day-what">Set up your extra debt payment — automated, timed for payday, targeting priority debt.</div></div></div>
+        <div class="day-row" data-day="18" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 18</span><span class="day-action">Investment readiness</span></div><div class="day-what">Run the investment starting point prompt (Ch.8). Confirm whether you are ready.</div></div></div>
+        <div class="day-row" data-day="19" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 19</span><span class="day-action">Set up investment contribution</span></div><div class="day-what">If ready: open your account or confirm your super/401k. Set amount and date.</div></div></div>
+        <div class="day-row" data-day="20" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 20</span><span class="day-action">Red-Teaming prompt</span></div><div class="day-what">Run the pessimistic auditor prompt (Ch.10) on your complete plan. Find the weaknesses.</div></div></div>
+        <div class="day-row" data-day="21" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 21</span><span class="day-action">Week 3 review</span></div><div class="day-what">Ask AI which single automated transfer this week has the highest long-term impact.</div></div></div>
+      </div>
+    </div>
+
+    <!-- WEEK 4 -->
+    <div class="week-section w4">
+      <div class="week-header"><div class="week-num">W4</div><div class="week-info"><div class="week-title">Maintain and Transform</div><div class="week-sub">Establish the rituals. The system that keeps all other systems running.</div></div><div class="week-badge">Days 22–30</div></div>
+      <div class="days-grid">
+        <div class="day-row" data-day="22" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 22</span><span class="day-action">Set up Money Monday</span></div><div class="day-what">Choose your weekly ritual day and time. Add to calendar. Run your first check-in.</div></div></div>
+        <div class="day-row" data-day="23" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 23</span><span class="day-action">The assumption audit</span></div><div class="day-what">Run the monthly assumption audit (Ch.10). Identify the most optimistic assumption.</div></div></div>
+        <div class="day-row" data-day="24" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 24</span><span class="day-action">Life change update</span></div><div class="day-what">Ask AI: given my complete financial picture, is there anything I should reconsider?</div></div></div>
+        <div class="day-row" data-day="25" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 25</span><span class="day-action">Savings projection</span></div><div class="day-what">Run the 12-month savings projection (Ch.5). Confirm your emergency fund timeline.</div></div></div>
+        <div class="day-row" data-day="26" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 26</span><span class="day-action">Debt freedom projection</span></div><div class="day-what">Run the debt freedom projection (Ch.7). Add your payoff date to your calendar.</div></div></div>
+        <div class="day-row" data-day="27" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 27</span><span class="day-action">Investment projection</span></div><div class="day-what">Run the 10-year investment projection (Ch.8). Save conservative and optimistic figures.</div></div></div>
+        <div class="day-row" data-day="28" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 28</span><span class="day-action">Complete system review</span></div><div class="day-what">Ask AI for a full A.I.M. summary: audit, budget, automation, maintenance, projections.</div></div></div>
+        <div class="day-row" data-day="29" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 29</span><span class="day-action">Annual review placeholder</span></div><div class="day-what">Set up your annual review structure. Schedule it in your calendar — same time, every year.</div></div></div>
+        <div class="day-row" data-day="30" onclick="toggle(this)"><div class="day-checkbox"><span class="checkmark">✓</span></div><div class="day-info"><div class="day-num-action"><span class="day-num">Day 30</span><span class="day-action">The reset reflection</span></div><div class="day-what">Ask AI: given everything shared over 30 days, what has changed most significantly?</div></div></div>
+      </div>
+    </div>
+
+    <!-- COMPLETION SCREEN — ceremonial, larger padding -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="completion-line1">The goal was never to become obsessed with money.</div>
+      <div class="completion-line2">The goal was to stop being controlled by it.</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Let AI Handle Your Money · 2026</div>
+    <div class="footer-right">A.I.M. Framework · 30-Day Behavioral Reset</div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'aim_reset_progress';
+
+// Identity-layer milestone messages
+const MILESTONES = {
+  7:  '<strong>Week 1 complete.</strong> You now understand your financial reality with clarity. That understanding is the foundation everything else depends on.',
+  14: '<strong>Week 2 complete.</strong> Your first systems are operating automatically. Money is moving without requiring a decision from you.',
+  21: '<strong>Week 3 complete.</strong> This is who you are becoming now — someone with systems, not someone trying harder.',
+  30: '<strong>Day 30 complete.</strong> The system exists independently of motivation. It was never about willpower. It was about design.',
+};
+
+function toggle(el) {
+  el.classList.toggle('checked');
+  save();
+  updateProgress();
+}
+
+function save() {
+  const rows = document.querySelectorAll('.day-row');
+  const state = {};
+  rows.forEach(r => { state[r.dataset.day] = r.classList.contains('checked'); });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+}
+
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    const state = JSON.parse(saved);
+    const rows = document.querySelectorAll('.day-row');
+    let anyChecked = false;
+    rows.forEach(r => {
+      if (state[r.dataset.day]) { r.classList.add('checked'); anyChecked = true; }
+    });
+    return anyChecked;
+  } catch(e){ return false; }
+}
+
+function updateProgress() {
+  const total = document.querySelectorAll('.day-row').length;
+  const done  = document.querySelectorAll('.day-row.checked').length;
+  const pct   = (done/total)*100;
+
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  // Progress note
+  const notes = [
+    'Start Day 1 — tick each day as you complete it.',
+    'Week 1 underway. The audit phase is building the foundation.',
+    'Halfway through Week 1. The picture is becoming clear.',
+    'Week 1 complete. You now have a complete financial picture.',
+    'Week 2 underway. Automation is beginning.',
+    'Week 2 complete. Savings and spending systems are running.',
+    'Week 3 underway. Debt and investing now in focus.',
+    'Week 3 complete. All four automated systems are running.',
+    'Week 4 underway. Building the rituals that maintain everything.',
+    'Day 30 complete. Your A.I.M. system is built and running.',
+  ];
+  document.getElementById('progress-note').textContent = notes[Math.min(Math.floor((done/total)*9), 9)];
+
+  // Milestone
+  const milestoneEl = document.getElementById('milestone-msg');
+  const milestoneText = document.getElementById('milestone-text');
+  if (MILESTONES[done]) {
+    milestoneText.innerHTML = MILESTONES[done];
+    milestoneEl.classList.add('show');
+  } else {
+    milestoneEl.classList.remove('show');
+  }
+
+  // Next-up highlight — guided continuity
+  document.querySelectorAll('.day-row').forEach(r => r.classList.remove('next-up'));
+  const unchecked = document.querySelector('.day-row:not(.checked)');
+  if (unchecked) unchecked.classList.add('next-up');
+
+  // Completion screen
+  const completionEl = document.getElementById('completion-screen');
+  if (done === 30) {
+    completionEl.classList.add('show');
+    setTimeout(() => completionEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+  } else {
+    completionEl.classList.remove('show');
+  }
+}
+
+// Init — load saved state, show return message if prior progress
+window.addEventListener('DOMContentLoaded', () => {
+  const hadPrior = load();
+  const done = document.querySelectorAll('.day-row.checked').length;
+  if (hadPrior && done > 0 && done < 30) {
+    document.getElementById('return-msg').classList.add('show');
+  }
+  updateProgress();
+});
+</script>
+</body>
+</html>

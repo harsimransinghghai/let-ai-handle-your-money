@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Masking Template — A.I.M. Framework</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --ink:       #1A1A2E;
+    --ink-70:    rgba(26,26,46,.70);
+    --ink-40:    rgba(26,26,46,.40);
+    --blue:      #3157C9;
+    --blue-d:    #1E3A8A;
+    --blue-l:    #EFF6FF;
+    --blue-ll:   #DBEAFE;
+    --blue-dash: rgba(147,197,253,.28);
+    --white:     #FFFFFF;
+    --off:       rgba(248,250,252,.5);
+    --slate:     rgba(226,232,240,.55);
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #E8EEF8;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .page {
+    background: var(--white);
+    width: 100%;
+    max-width: 800px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,.02),
+      0 8px 24px rgba(49,87,201,.08),
+      0 32px 80px rgba(26,26,46,.06);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--ink);
+    padding: 28px 32px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -60px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(49,87,201,.14);
+  }
+  .eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: #93C5FD;
+    margin-bottom: 10px; position: relative; z-index: 1;
+  }
+  .headline {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(20px, 5vw, 28px); font-weight: 800;
+    color: #fff; line-height: 1.15; letter-spacing: -.3px;
+    position: relative; z-index: 1;
+  }
+  .headline span { color: #93C5FD; }
+  .header-sub {
+    font-size: 13px; color: rgba(255,255,255,.5);
+    margin-top: 12px; line-height: 1.7;
+    position: relative; z-index: 1;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    background: var(--blue-l);
+    padding: 18px 32px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-bottom: 1px solid var(--blue-ll);
+  }
+  .how-icon { font-size: 17px; flex-shrink: 0; margin-top: 2px; }
+  .how-text  { font-size: 13px; color: var(--blue-d); line-height: 1.7; }
+  .how-text strong { font-weight: 700; }
+
+  /* ── BODY ── */
+  .body { padding: 28px 32px 44px; }
+
+  /* ── SECTION ── */
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--ink-40);
+    margin-bottom: 4px; margin-top: 32px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── COLUMN HEADER ROW ── */
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px 16px;
+    background: var(--blue-d);
+    border-radius: 8px 8px 0 0;
+    margin-top: 10px;
+  }
+  .col-h-left {
+    flex: 1;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: #fff;
+  }
+  .col-h-arrow { width: 36px; text-align: center; }
+  .col-h-right {
+    flex: 1;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: #fff;
+  }
+
+  /* ── DATA ROWS — flexbox, fully responsive ── */
+  .row-group {
+    border: 1px solid var(--slate);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+  }
+
+  .mask-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--slate);
+    transition: background .15s;
+  }
+  .mask-row:last-child { border-bottom: none; }
+  .mask-row:nth-child(even) { background: var(--off); }
+  .mask-row:hover { background: rgba(248,250,252,.85); }
+
+  .row-left {
+    flex: 1;
+    padding: 16px 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  .row-label {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    line-height: 1.3;
+  }
+  .row-hint {
+    font-size: 11px; color: var(--ink-40);
+    margin-top: 3px; line-height: 1.4;
+  }
+
+  .row-arrow {
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--blue);
+    opacity: .35;
+  }
+
+  .row-right {
+    flex: 1;
+    padding: 14px 16px 14px 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  /* Paper annotation space */
+  .annotation {
+    border-bottom: 1px dashed var(--blue-dash);
+    padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ann-rounding {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--ink-40);
+    letter-spacing: .2px;
+  }
+  .ann-example {
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    color: var(--blue);
+    opacity: .75;
+  }
+
+  /* ── EXAMPLE BLOCK ── */
+  .example {
+    background: #202338;
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-top: 24px;
+  }
+  .example-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #93C5FD; margin-bottom: 14px;
+  }
+  .example-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .example-row:last-child { margin-bottom: 0; }
+  .ex-real {
+    font-family: 'DM Mono', monospace;
+    background: rgba(220,38,38,.14); color: #FCA5A5;
+    padding: 4px 10px; border-radius: 5px;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .ex-arrow { color: rgba(255,255,255,.2); font-size: 13px; flex-shrink: 0; }
+  .ex-anon {
+    font-family: 'DM Mono', monospace;
+    background: rgba(49,87,201,.22); color: #93C5FD;
+    padding: 4px 10px; border-radius: 5px;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .ex-why { font-size: 11px; color: rgba(255,255,255,.28); }
+
+  /* ── PRIVACY ── */
+  .privacy {
+    background: #FFF7ED;
+    border-left: 3px solid #F59E0B;
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    display: flex; gap: 12px;
+    align-items: flex-start;
+    margin-top: 28px;
+  }
+  .privacy-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+  .privacy-text { font-size: 13px; color: #92400E; line-height: 1.7; }
+  .privacy-text strong { font-weight: 700; }
+
+  /* ── COMPLETION ── */
+  .completion {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: rgba(248,250,252,.8);
+    border-radius: 10px;
+    border-left: 3px solid var(--blue);
+    font-size: 13px; color: var(--ink-70); line-height: 1.7;
+  }
+  .completion strong { color: var(--blue); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: rgba(248,250,252,.8);
+    border-top: 1px solid var(--slate);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer-left  { font-size: 12px; font-weight: 500; color: var(--ink-40); }
+  .footer-right {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-40); letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 520px) {
+    .header, .how, .body, .footer { padding-left: 20px; padding-right: 20px; }
+    .col-header { padding: 10px 12px; }
+    .row-left    { padding: 14px 12px 14px 12px; }
+    .row-arrow   { width: 28px; }
+    .row-right   { padding: 12px 12px 12px 2px; }
+    .col-h-left, .col-h-right { font-size: 10px; letter-spacing: 1px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="eyebrow">Chapter 3 · Audit Phase · A.I.M. Framework</div>
+    <div class="headline">Data Masking Template<br><span>Prepare your numbers before the AI audit</span></div>
+    <div class="header-sub">Convert your real figures into anonymised amounts before sharing with any AI tool. Your bank details stay private. The AI gets everything it needs.</div>
+  </div>
+
+  <div class="how">
+    <div class="how-icon">🔒</div>
+    <div class="how-text"><strong>How it works:</strong> Write your real figure on the left. Round it and remove identifying details. Use the anonymised figure in AI prompts. <strong>The AI never needs the exact number. It needs the pattern.</strong></div>
+  </div>
+
+  <div class="body">
+
+    <!-- SECTION 1 — INCOME -->
+    <div class="section-label">Section 1 — Income</div>
+    <div class="col-header">
+      <span class="col-h-left">Your Real Figure</span>
+      <span class="col-h-arrow"></span>
+      <span class="col-h-right">Anonymised Figure for AI</span>
+    </div>
+    <div class="row-group">
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Monthly take-home pay</span><span class="row-hint">After tax, after deductions</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $100</span><span class="ann-example">e.g. $4,200</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Secondary income</span><span class="row-hint">Freelance, rental, other</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $50</span><span class="ann-example">e.g. $300</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Any other regular income</span><span class="row-hint">Government payments, benefits</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $50</span><span class="ann-example">e.g. $150</span></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2 — FIXED COSTS -->
+    <div class="section-label">Section 2 — Fixed Monthly Costs</div>
+    <div class="col-header">
+      <span class="col-h-left">Your Real Figure</span>
+      <span class="col-h-arrow"></span>
+      <span class="col-h-right">Anonymised Figure for AI</span>
+    </div>
+    <div class="row-group">
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Rent or mortgage</span><span class="row-hint">Use "my rent" — not landlord name</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $50</span><span class="ann-example">e.g. $1,500</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Utilities</span><span class="row-hint">Electricity, gas, water, internet</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $200</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Insurance</span><span class="row-hint">Health, car, contents — combined</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $175</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Phone and subscriptions</span><span class="row-hint">Use "my phone plan" — not carrier name</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $10</span><span class="ann-example">e.g. $120</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Loan repayments</span><span class="row-hint">Car, personal loan — not mortgage</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $350</span></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3 — VARIABLE SPENDING -->
+    <div class="section-label">Section 3 — Variable Monthly Spending</div>
+    <div class="col-header">
+      <span class="col-h-left">Your Real Figure</span>
+      <span class="col-h-arrow"></span>
+      <span class="col-h-right">Anonymised Figure for AI</span>
+    </div>
+    <div class="row-group">
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Groceries</span><span class="row-hint">Average monthly spend</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $450</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Transport</span><span class="row-hint">Petrol, public transport, rideshare</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $200</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Dining and entertainment</span><span class="row-hint">Cafes, restaurants, events</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $300</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Clothing and personal</span><span class="row-hint">Average — include seasonal</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $150</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Health and fitness</span><span class="row-hint">Gym, medical, pharmacy</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $100</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Other variable spending</span><span class="row-hint">Anything not listed above</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $25</span><span class="ann-example">e.g. $75</span></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4 — SAVINGS AND DEBT -->
+    <div class="section-label">Section 4 — Savings and Debt Balances</div>
+    <div class="col-header">
+      <span class="col-h-left">Your Real Figure</span>
+      <span class="col-h-arrow"></span>
+      <span class="col-h-right">Anonymised Figure for AI</span>
+    </div>
+    <div class="row-group">
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Savings balance</span><span class="row-hint">Use "my savings" — not bank name</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $500</span><span class="ann-example">e.g. $2,500</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Credit card balance</span><span class="row-hint">Use "my credit card" — not issuer name</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $100</span><span class="ann-example">e.g. $3,200</span></div></div>
+      </div>
+      <div class="mask-row">
+        <div class="row-left"><span class="row-label">Other debt</span><span class="row-hint">Student loan, personal loan, HECS/HELP</span></div>
+        <div class="row-arrow">→</div>
+        <div class="row-right"><div class="annotation"><span class="ann-rounding">Round to nearest $500</span><span class="ann-example">e.g. $12,000</span></div></div>
+      </div>
+    </div>
+
+    <!-- EXAMPLE -->
+    <div class="example">
+      <div class="example-label">Example — What Good Masking Looks Like</div>
+      <div class="example-row">
+        <span class="ex-real">$4,247.83/month from Deloitte</span>
+        <span class="ex-arrow">→</span>
+        <span class="ex-anon">$4,200/month from my employer</span>
+        <span class="ex-why">— rounded, employer removed</span>
+      </div>
+      <div class="example-row">
+        <span class="ex-real">$1,847.50 rent to McGrath</span>
+        <span class="ex-arrow">→</span>
+        <span class="ex-anon">$1,850 rent</span>
+        <span class="ex-why">— rounded, agent name removed</span>
+      </div>
+      <div class="example-row">
+        <span class="ex-real">$18,432 HECS debt</span>
+        <span class="ex-arrow">→</span>
+        <span class="ex-anon">$18,500 student debt</span>
+        <span class="ex-why">— rounded, type genericised</span>
+      </div>
+    </div>
+
+    <!-- PRIVACY -->
+    <div class="privacy">
+      <div class="privacy-icon">⚠️</div>
+      <div class="privacy-text">
+        <strong>Never share with AI:</strong> account numbers, BSB/routing numbers, passwords, Medicare or Social Security numbers, passport details, or login credentials of any kind. The AI is the architect of your plan — not a platform with access to your accounts.
+      </div>
+    </div>
+
+    <!-- COMPLETION -->
+    <div class="completion">
+      <strong>When complete:</strong> use your anonymised figures inside the Audit prompts in Chapter 3. You now have everything the AI needs to build an accurate picture of your financial reality.
+    </div>
+
+  </div><!-- /body -->
+
+  <div class="footer">
+    <div class="footer-left">Let AI Handle Your Money · 2026</div>
+    <div class="footer-right">A.I.M. Framework · Companion Resource</div>
+  </div>
+
+</div>
+</body>
+</html>
