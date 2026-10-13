@@ -119,7 +119,7 @@
 <div class="page">
   <div class="header">
     <div class="eyebrow">Chapter 8 · Implement Phase · A.I.M. Framework</div>
-    <div class="headline">Compound Growth Calculator<br><span>See exactly what your money can become</span></div>
+    <div class="headline">Compound Growth Calculator<br><span>Explore hypothetical growth scenarios</span></div>
     <div class="header-sub">Enter your monthly contribution, timeline, and return rate. Try different scenarios to understand how each variable changes the outcome.</div>
   </div>
 
@@ -129,24 +129,24 @@
         <div class="input-label">Monthly Contribution</div>
         <div class="input-wrap">
           <div class="input-prefix">$</div>
-          <input class="input-field" type="number" id="monthly" value="50" min="1" max="10000" oninput="calculate()">
+          <input class="input-field" type="number" id="monthly" aria-label="Monthly contribution" value="50" min="1" max="10000" oninput="calculate()">
         </div>
       </div>
       <div class="input-group">
         <div class="input-label">Years to Invest</div>
         <div class="slider-group">
           <div class="slider-row">
-            <input class="slider" type="range" id="years" min="1" max="40" value="30" oninput="updateYears();calculate()">
+            <input class="slider" type="range" id="years" aria-label="Years" min="1" max="40" value="30" oninput="updateYears();calculate()">
             <div class="slider-val" id="years-val">30 yrs</div>
           </div>
           <div class="slider-range"><span>1 yr</span><span>40 yrs</span></div>
         </div>
       </div>
       <div class="input-group">
-        <div class="input-label">Annual Return Rate</div>
+        <div class="input-label">Assumed Nominal Annual Rate</div>
         <div class="slider-group">
           <div class="slider-row">
-            <input class="slider" type="range" id="rate" min="1" max="15" step="0.5" value="7" oninput="updateRate();calculate()">
+            <input class="slider" type="range" id="rate" aria-label="Assumed nominal annual rate" min="1" max="15" step="0.5" value="7" oninput="updateRate();calculate()">
             <div class="slider-val" id="rate-val">7%</div>
           </div>
           <div class="slider-range"><span>1%</span><span>15%</span></div>
@@ -154,20 +154,23 @@
       </div>
     </div>
 
+    <div class="header-sub" style="color:var(--ink-70);margin:0">Model assumptions: zero opening balance; constant nominal annual rate divided by 12; monthly compounding; contributions at each month end; returns reinvested. No fees, taxes, inflation or withdrawals. The $ symbol is illustrative: use one currency. Positive-rate controls do not model losses; actual investments can lose money.</div>
+    <div id="input-error" role="status" aria-live="polite" style="color:#92400E;display:none"></div>
+    <noscript>JavaScript is required to update this illustration. The default book example is $50 a month for 30 years at an assumed 7% nominal annual rate.</noscript>
     <div class="results">
       <div class="result-item">
         <div class="result-label">Your Contribution</div>
         <div class="result-val" id="res-contributed">$18,000</div>
-        <div class="result-sub">Your actual money in</div>
+        <div class="result-sub">Modelled contributions</div>
       </div>
       <div class="result-item">
         <div class="result-label">Compound Growth</div>
-        <div class="result-val highlight" id="res-growth">$42,852</div>
-        <div class="result-sub">Returns earning returns</div>
+        <div class="result-val highlight" id="res-growth">$42,999</div>
+        <div class="result-sub">Hypothetical growth</div>
       </div>
       <div class="result-item">
         <div class="result-label">Total Portfolio Value</div>
-        <div class="result-val green" id="res-total">$60,852</div>
+        <div class="result-val green" id="res-total">$60,999</div>
         <div class="result-sub" id="res-multiplier">3.4× your money</div>
       </div>
     </div>
@@ -176,7 +179,7 @@
       <div class="chart-header">
         <div class="chart-titles">
           <div class="chart-title">Growth Over Time</div>
-          <div class="chart-sub">How your portfolio builds year by year</div>
+          <div class="chart-sub">Hypothetical model, not a market forecast</div>
         </div>
         <div class="chart-legend">
           <div class="leg"><div class="leg-line" style="background:var(--blue)"></div><span>Total value</span></div>
@@ -199,7 +202,7 @@
     </div>
 
     <div class="insight" id="insight-text">
-      <strong>Key insight:</strong> At $50/month for 30 years at 7%, you contribute $18,000 of your own money and end with $60,852. The other $42,852 — 70% of your final balance — came entirely from compound growth. This is why starting date matters more than starting amount.
+      <strong>Key insight:</strong> At $50/month for 30 years at 7%, the model includes $18,000 in contributions and ends at $60,999. The other $42,999 — 70% of your final balance — is hypothetical growth under these assumptions. Contribution amount, duration and assumed rate all affect the illustration. This is not a forecast.
     </div>
 
     <div class="reflection">
@@ -234,9 +237,23 @@ function smoothPath(pts){
 }
 
 function calculate(){
-  const pmt=parseFloat(document.getElementById('monthly').value)||0;
+  const raw=document.getElementById('monthly').value;
+  const pmt=Number(raw);
+  const error=document.getElementById('input-error');
+  if(raw.trim()==='' || !Number.isFinite(pmt) || pmt<1 || pmt>10000){
+    error.textContent='Enter a monthly contribution from 1 to 10,000. Results are unavailable until the input is valid.';
+    error.style.display='block';
+    ['res-contributed','res-growth','res-total'].forEach(id=>document.getElementById(id).textContent='Unavailable');
+    document.getElementById('res-multiplier').textContent='Check input';
+    document.getElementById('insight-text').textContent='A zero contribution adds no money. Use a valid positive contribution to compare this model.';
+    document.getElementById('chart-svg').innerHTML=''; return;
+  }
+  error.style.display='none';
   const yrs=parseInt(document.getElementById('years').value);
   const rate=parseFloat(document.getElementById('rate').value)/100;
+  if(!Number.isInteger(yrs)||yrs<1||yrs>40||!Number.isFinite(rate)||rate<0.01||rate>0.15){
+    error.textContent='Choose 1–40 years and an assumed nominal annual rate of 1–15%.';error.style.display='block';return;
+  }
   const r=rate/12,n=yrs*12;
   const fv=pmt*((Math.pow(1+r,n)-1)/r);
   const contributed=pmt*n,growth=fv-contributed;
@@ -250,9 +267,9 @@ function calculate(){
   const growthPct=Math.round((growth/fv)*100);
   document.getElementById('insight-text').innerHTML=
     `<strong>Key insight:</strong> At ${fmt(pmt)}/month for ${yrs} years at ${(rate*100).toFixed(1)}%, `+
-    `you contribute ${fmt(contributed)} of your own money and end with ${fmt(fv)}. `+
-    `The other ${fmt(growth)} — ${growthPct}% of your final balance — came entirely from compound growth. `+
-    `This is why starting date matters more than starting amount.`;
+    `the model includes ${fmt(contributed)} in contributions and ends at ${fmt(fv)}. `+
+    `The other ${fmt(growth)} — ${growthPct}% of your final balance — is hypothetical growth under these assumptions. `+
+    `Contribution amount, duration and assumed rate all affect the illustration. This is not a forecast.`;
 
   drawChart(pmt,yrs,r,fv);
 }
@@ -360,3 +377,4 @@ calculate();
 </script>
 </body>
 </html>
+
